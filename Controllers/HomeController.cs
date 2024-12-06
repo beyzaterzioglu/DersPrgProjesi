@@ -28,30 +28,61 @@ namespace DersPrgProjesi.Controllers
         // POST: Kullanýcý giriþi yap
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(admin ad)
+        public IActionResult Login(string Username, string Password)
         {
-            
+            // Admin kontrolü
             var admin = _context.Admins
-                .FirstOrDefault(a => a.Username == ad.Username && a.Password == ad.Password);
-
+                .FirstOrDefault(a => a.Username == Username && a.Password == Password);
             if (admin != null)
             {
-               
-                return RedirectToAction("index");
+                HttpContext.Session.SetString("UserType", "Admin");
+                return RedirectToAction("Index");
             }
-            else
+
+            // Fakülte kontrolü
+            var faculty = _context.Fakulteler
+                .FirstOrDefault(f => f.FakulteMail == Username && f.FakulteSifre == Password);
+            if (faculty != null)
             {
-                
-                return View("pages-login");
+                HttpContext.Session.SetString("UserType", "Fakulte");
+                return RedirectToAction("Index");
             }
 
-        }
+            // Bölüm kontrolü
+            var department = _context.Bolumler
+                .FirstOrDefault(d => d.BolumMail == Username && d.BolumSifre == Password);
+            if (department != null)
+            {
+                HttpContext.Session.SetString("UserType", "Bolum");
+                return RedirectToAction("Index");
+            }
 
-        public IActionResult Index() // Anasayfa
+            // Kullanýcý bulunamadý
+            ViewBag.ErrorMessage = "Kullanici adi veya sifre hatali.";
+            return View("pages-login");
+        }
+        public IActionResult Logout()
         {
-            return View("index"); // index.cshtml
+            // Oturumu temizle
+            HttpContext.Session.Clear();
+
+            // Giriþ sayfasýna yönlendir
+            return RedirectToAction("Login");
         }
 
+        public IActionResult Index()
+        {
+            // Oturum kontrolü yap
+            if (HttpContext.Session.GetString("UserType") == null)
+            {
+                // Eðer oturum açýlmamýþsa, Login sayfasýna yönlendir
+                return RedirectToAction("Login");
+            }
+
+            var sýnýflar = _context.Sýnýflar.ToList(); // Sýnýf verisini alýyoruz 
+
+            return View("index", sýnýflar); // index.cshtml
+        }
         public IActionResult BolumEkle() // Anasayfa
         {
             return View("bolumekle");
@@ -62,25 +93,49 @@ namespace DersPrgProjesi.Controllers
             return View("dersekleme"); 
         }
 
-        public IActionResult KullanýcýKayýt() 
+        public IActionResult KullanýcýKayýt()
         {
-            return View("kullanýcýkayýt"); 
+            return View("kullanýcýkayýt");
         }
 
-        public IActionResult SýnýfEkle()
-        {
-            return View("sýnýfekleme");
-        }
+        //public IActionResult SýnýfEkle()
+        //{
+        //    return View("sýnýfekleme");
+        //}
 
         public IActionResult TablesData()
         {
-            return View("tables-data");
+
+
+            //var sýnýflar = _context.Sýnýflar.ToList();
+
+            //// Kontrol: Sýnýflar boþ deðilse, doðru model gönderildiðinden emin olalým
+            //if (sýnýflar != null && sýnýflar.Any())
+            //{
+            //    return View("tables-data", sýnýflar);  // Modeli doðru þekilde View'a gönderiyoruz.
+            //}
+            //return View("index"); 
+
+            var sýnýflar = _context.Sýnýflar
+        .Include(s => s.Fakulte)  // Fakülte bilgilerini de dahil ediyoruz
+        .ToList();
+
+            if (sýnýflar != null && sýnýflar.Any())
+            {
+                return View("tables-data", sýnýflar); // Fakülte bilgisiyle birlikte model gönderiyoruz.
+            }
+            return View("index"); // Eðer veriler boþsa index'e yönlendiririz
         }
 
-        public IActionResult TablesGeneral()
+        public IActionResult TablesGeneral(int sýnýfID)
         {
-            return View("tables-general");
+            var sýnýflar = _context.Sýnýflar.ToList();
+
+
+
+            return View("tables-general",sýnýflar);
         }
+
 
         public IActionResult Privacy()
         {

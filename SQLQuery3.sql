@@ -1,1 +1,1 @@
-﻿select * from Admins;
+﻿select * from Fakulteler

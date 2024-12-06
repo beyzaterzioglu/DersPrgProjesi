@@ -1,3 +1,4 @@
+@model IEnumerable<DersPrgProjesi.Models.Sınıf>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -56,66 +57,28 @@
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
 
+                <li class="nav-item dropdown">
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications"></ul>
+
+                </li>
 
                 <li class="nav-item dropdown">
 
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages"></ul>
 
+                </li>
 
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-                    </ul><!-- End Notification Dropdown Items -->
-
-                </li><!-- End Notification Nav -->
-
-                <li class="nav-item dropdown">
-
-
-
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
-
-
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-
-
-
-                    </ul><!-- End Messages Dropdown Items -->
-
-                </li><!-- End Messages Nav -->
-
+                <!-- Directly "Çıkış Yap" button -->
                 <li class="nav-item dropdown pe-3">
-
-                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-
-                        <span class="d-none d-md-block dropdown-toggle ps-2">İşlemler</span>
-                    </a><!-- End Profile Iamge Icon -->
-
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
-
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Çıkış Yap</span>
-                            </a>
-                        </li>
-
-                    </ul><!-- End Profile Dropdown Items -->
+                    <a class="dropdown-item d-flex align-items-center" href="/Home/Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-md-block ps-2">Çıkış Yap</span>
+                    </a>
                 </li><!-- End Profile Nav -->
 
             </ul>
-        </nav><!-- End Icons Navigation -->
+        </nav>
 
     </header><!-- End Header -->
     <!-- ======= Sidebar ======= -->
@@ -138,22 +101,26 @@
                             <i class="bi bi-circle"></i><span>Tüm Sınıflar </span>
                         </a>
                     </li>
-                    <li>
-                        <a href="/Home/TablesGeneral">
-                            <i class="bi bi-circle"></i><span>Sınıf #1</span>
-                        </a>
-                    </li>
+                    @foreach (var sınıf in Model)
+                    {
+                        <li>
+                            <a href="/Home/TablesGeneral/@sınıf.SınıfID">
+                                <i class="bi bi-circle"></i><span>@sınıf.SınıfAd</span>
+                            </a>
+                        </li>
+                    }
                 </ul>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/Home/KullanıcıKayıt">
+                <a class="nav-link collapsed" href="/FakulteKayıt/KullanıcıKayıt">
                     <i class="bi bi-card-list"></i>
                     <span>Kullanıcı Ekle</span>
                 </a>
             </li>
+
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/Home/BolumEkle">
+                <a class="nav-link collapsed" href="/BolumEkle/BolumEkle">
                     <i class="bi bi-card-list"></i>
                     <span>Bölüm Ekle</span>
                 </a>
@@ -172,31 +139,47 @@
             <div class="card-body">
                 <h5 class="card-title">Sınıf bilgilerini doldurunuz.</h5>
 
-                <!-- Vertical Form -->
-                <form class="row g-3">
-                    <div class="col-12">
-                        <label for="inputNanme4" class="form-label">Sınıf Adı</label>
-                        <input type="text" class="form-control" id="inputNanme4">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputEmail4" class="form-label">Bulunduğu Blok</label>
-                        <input type="text" class="form-control" id="inputEmail4">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPassword4" class="form-label">Kapasite</label>
-                        <input type="text" class="form-control" id="inputPassword4">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPassword4" class="form-label">Sınav İçin Kapasite</label>
-                        <input type="text" class="form-control" id="inputPassword4">
-                    </div>
-                    <div class="text-center">
-                        <button type="button" class="btn btn-outline-primary" onclick="window.location.href='/Home/TablesData'">
-                            Kayıt
-                        </button>
+                @using (Html.BeginForm("SınıfEkle", "SınıfEkle", FormMethod.Post))
+{
+    <!-- Vertical Form -->
+    <div class="row g-3">
+        <div class="col-12">
+            <label for="SınıfAd" class="form-label">Sınıf Adı</label>
+            <input type="text" class="form-control" id="SınıfAd" name="SınıfAd">
+        </div>
+        
+       @*  <div class="col-12">
+            <label for="BulunduğuBlok" class="form-label">Bulunduğu Blok</label>
+            <input type="text" class="form-control" id="BulunduğuBlok" name="BulunduğuBlok">
+        </div> *@
 
-                    </div>
-                </form><!-- Vertical Form -->
+        <div class="col-12">
+            <label for="Kapasite" class="form-label">Kapasite</label>
+            <input type="number" class="form-control" id="Kapasite" name="Kapasite">
+        </div>
+
+        <div class="col-12">
+            <label for="SınavKapasite" class="form-label">Sınav İçin Kapasite</label>
+            <input type="number" class="form-control" id="SınavKapasite" name="SınavKapasite">
+        </div>
+
+                        <div class="col-12">
+                            <label for="fakulteSelect" class="form-label">Fakülte Adı</label>
+                            <select class="form-select" id="fakulteSelect" name="FakulteAd">
+                                <option selected>Fakülte Seçin</option>
+                                <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                            </select>
+                        </div>
+
+        <div class="text-center">
+            <!-- Buton artık formu gönderecek -->
+            <button type="submit" class="btn btn-outline-primary">
+                Kayıt
+            </button>
+        </div>
+    </div>
+}
+
 
             </div>
 
@@ -228,7 +211,24 @@
     <script src="~/assets/vendor/php-email-form/validate.js"></script>
 
     <!-- Template Main JS File -->
-    <script src="~/assets/js/main.js"></script>
+    <script src="~/js/main.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://localhost:7142/api/FakulteKayit/GetFakulteler') // Fakülte adlarını getiren API endpoint'i
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById("fakulteSelect");
+                    data.forEach(fakulte => {
+                        const option = document.createElement("option");
+                        option.value = fakulte.fakulteAd;  // Fakülte Adı
+                        option.textContent = fakulte.fakulteAd; // Fakülte Adı
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Fakülteler yüklenirken bir hata oluştu:", error));
+        });
+    </script>
 
 </body>
 

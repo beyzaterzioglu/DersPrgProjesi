@@ -22,5 +22,7 @@ namespace DersPrgProjesi.Data
        
         public DbSet<admin> Admins { get; set; }
         public DbSet<Fakulte> Fakulteler { get; set; }
+        public DbSet<Bolum> Bolumler { get; set; }
+        public DbSet<Sınıf> Sınıflar { get; set; }
     }
 }

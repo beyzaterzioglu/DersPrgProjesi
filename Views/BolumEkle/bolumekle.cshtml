@@ -28,14 +28,6 @@
 
     <!-- Template Main CSS File -->
     <link href="~/assets/css/style.css" rel="stylesheet">
-
-    <!-- =======================================================
-    * Template Name: NiceAdmin
-    * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
-    * Updated: Apr 20 2024 with Bootstrap v5.3.3
-    * Author: BootstrapMade.com
-    * License: https://bootstrapmade.com/license/
-    ======================================================== -->
 </head>
 
 <body>
@@ -51,37 +43,33 @@
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div>
         <!-- End Logo -->
+        <!-- End Search Bar -->
 
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
-                <li class="nav-item dropdown">
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-                    </ul><!-- End Notification Dropdown Items -->
-                </li><!-- End Notification Nav -->
 
                 <li class="nav-item dropdown">
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                    </ul><!-- End Messages Dropdown Items -->
-                </li><!-- End Messages Nav -->
 
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications"></ul>
+
+                </li>
+
+                <li class="nav-item dropdown">
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages"></ul>
+
+                </li>
+
+                <!-- Directly "Çıkış Yap" button -->
                 <li class="nav-item dropdown pe-3">
-                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                        <span class="d-none d-md-block dropdown-toggle ps-2">İşlemler</span>
-                    </a><!-- End Profile Image Icon -->
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Çıkış Yap</span>
-                            </a>
-                        </li>
-                    </ul><!-- End Profile Dropdown Items -->
+                    <a class="dropdown-item d-flex align-items-center" href="/Home/Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-md-block ps-2">Çıkış Yap</span>
+                    </a>
                 </li><!-- End Profile Nav -->
+
             </ul>
-        </nav><!-- End Icons Navigation -->
+        </nav>
 
     </header><!-- End Header -->
     <!-- ======= Sidebar ======= -->
@@ -104,22 +92,25 @@
                             <i class="bi bi-circle"></i><span>Tüm Sınıflar </span>
                         </a>
                     </li>
-                    <li>
-                        <a href="/Home/TablesGeneral">
-                            <i class="bi bi-circle"></i><span>Sınıf #1</span>
-                        </a>
-                    </li>
+                    @foreach (var sınıf in Model)
+                    {
+                        <li>
+                            <a href="/Home/TablesGeneral/@sınıf.SınıfID">
+                                <i class="bi bi-circle"></i><span>@sınıf.SınıfAd</span>
+                            </a>
+                        </li>
+                    }
                 </ul>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/Home/KullanıcıKayıt">
+                <a class="nav-link collapsed" href="/FakulteKayıt/KullanıcıKayıt">
                     <i class="bi bi-card-list"></i>
                     <span>Kullanıcı Ekle</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/Home/BolumEkle">
+                <a class="nav-link collapsed" href="/BolumEkle/BolumEkle">
                     <i class="bi bi-card-list"></i>
                     <span>Bölüm Ekle</span>
                 </a>
@@ -137,33 +128,35 @@
                 <h5 class="card-title">Kayıt için gerekli bilgilerini doldurunuz.</h5>
 
                 <!-- Vertical Form -->
-                <form class="row g-3">
+                @using (Html.BeginForm("BolumEkle", "BolumEkle", FormMethod.Post))
+                {
                     <div class="col-12">
                         <label for="inputName4" class="form-label">Bölüm Adı</label>
-                        <input type="text" class="form-control" id="inputName4">
+                        <input type="text" class="form-control" id="inputName4" name="BolumAd" >
                     </div>
                     <div class="col-12">
                         <label for="inputEmail4" class="form-label">Bölüm Maili</label>
-                        <input type="email" class="form-control" id="inputEmail4">
+                        <input type="email" class="form-control" id="inputEmail4" name="BolumMail">
                     </div>
                     <div class="col-12">
-                        <label for="inputUsername4" class="form-label">Bölüm Kullanıcı Adı</label>
-                        <input type="text" class="form-control" id="inputUsername4">
+                        <label for="fakulteSelect" class="form-label">Fakülte Adı</label>
+                        <select class="form-select" id="fakulteSelect" name="FakulteAd">
+                            <option selected>Fakülte Seçin</option>
+                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                        </select>
                     </div>
                     <div class="col-12">
                         <label for="inputPassword4" class="form-label">Bölüm Şifresi</label>
-                        <input type="password" class="form-control" id="inputPassword4">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPasswordConfirm4" class="form-label">Bölüm Şifresi Tekrar</label>
-                        <input type="password" class="form-control" id="inputPasswordConfirm4">
+                        <input type="password" class="form-control" id="inputPassword4" name="BolumSifre">
                     </div>
                     <div class="text-center">
-                        <button type="button" class="btn btn-outline-primary" onclick="window.location.href='/Home/Index'">
-                            Kayıt
-                        </button>
+                        <button type="submit" class="btn btn-outline-primary">Kayıt</button>
                     </div>
-                </form><!-- Vertical Form -->
+                }
+
+                
+                
+                <!-- Vertical Form -->
 
             </div>
         </div>
@@ -192,6 +185,24 @@
 
     <!-- Template Main JS File -->
     <script src="~/assets/js/main.js"></script>
+
+    <!-- Fakülte Adlarını Yüklemek İçin JavaScript Kodunu Ekleyin -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://localhost:7142/api/FakulteKayit/GetFakulteler') // Fakülte adlarını getiren API endpoint'i
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById("fakulteSelect");
+                    data.forEach(fakulte => {
+                        const option = document.createElement("option");
+                        option.value = fakulte.fakulteAd;  // Fakülte Adı
+                        option.textContent = fakulte.fakulteAd; // Fakülte Adı
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Fakülteler yüklenirken bir hata oluştu:", error));
+        });
+    </script>
 
 </body>
 

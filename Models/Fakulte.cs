@@ -12,6 +12,7 @@ namespace DersPrgProjesi.Models
         public string FakulteMail { get; set; }
         [Required]  
         public string FakulteSifre { get; set; }
-        
+      
+
     }
 }

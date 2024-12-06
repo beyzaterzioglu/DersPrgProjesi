@@ -21,28 +21,79 @@ namespace DersPrgProjesi.Controllers
         [HttpGet]
         public IActionResult FakulteKayıt()
         {
+            var userType = HttpContext.Session.GetString("UserType");
+            if (userType != "Admin")
+            {
+                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+                return RedirectToAction("Index", "Home");
+            }
+            var sınıflar = _context.Sınıflar.ToList();
+            return View("kullanıcıkayıt",sınıflar);
+        }
+        public IActionResult KullanıcıKayıt()
+        {
+            var userType = HttpContext.Session.GetString("UserType");
+            if (userType != "Admin")
+            {
+                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+                return RedirectToAction("Index", "Home");
+            }
+
             return View("kullanıcıkayıt");
         }
+        //public IActionResult Index() // Anasayfa
+        //{
+        //    return View("index"); // index.cshtml
+        //}
+
         [HttpPost]
-        public IActionResult FakulteKayıt(Fakulte fakulte)
+        public IActionResult FakulteKayıt(Fakulte fakulte, string inputPasswordRepeat)
         {
-            // Yeni kullanıcı nesnesi oluştur
             if (ModelState.IsValid)
             {
-                // Veritabanına fakülteyi ekle
+                if (fakulte.FakulteSifre != inputPasswordRepeat)
+                {
+                    ModelState.AddModelError("", "Şifreler uyuşmuyor.");
+                    return View("kullanıcıkayıt");
+                }
+
                 _context.Fakulteler.Add(fakulte);
                 _context.SaveChanges();
-                return View("index");  // Başarıyla kaydedildikten sonra anasayfaya yönlendir
+                return RedirectToAction("index", "Home"); // Ana sayfaya yönlendirme // Kaydedildikten sonra Index sayfasına yönlendirme
             }
-            // Veritabanına kaydet
-
-            else
-            {
-                return View("kullanıcıkayıt");
-            }
-            // Kayıt başarılıysa giriş sayfasına veya ana sayfaya yönlendir
-           
+            //if (!ModelState.IsValid)
+            //{
+            //    // Hata mesajlarını görmek için:
+            //    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            //    _logger.LogError("ModelState hataları: {Errors}", errors);
+            //}
+            return RedirectToAction("KullanıcıKayıt","FakulteKayıt");
         }
+        [HttpGet]
+        
+        //public IActionResult GetFakulteIds()
+        //{
+        //    // FakulteAd değeri "Mühendislik ve Mimarlık Fakültesi" olan kayıtları sorgulayın
+        //    var fakulteIds = _context.Fakulteler
+        //                             .Where(f => f.FakulteAd == "Mühendislik ve Mimarlık Fakültesi")
+        //                             .Select(f => f.FakulteID) // sadece Id alanını seçiyoruz
+        //                             .ToList();
+
+        //    // ID'leri döndürün
+        //    return Ok(fakulteIds);
+        //}
+
+        [HttpGet]
+        [Route("api/FakulteKayit/GetFakulteler")]
+        public IActionResult GetFakulteler()
+        {
+            var fakulteler = _context.Fakulteler
+                          .Select(f => new { f.FakulteAd })
+                          .ToList();
+            return Ok(fakulteler);
+        }
+
+
     }
 }
 
