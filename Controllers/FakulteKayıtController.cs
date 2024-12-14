@@ -21,14 +21,42 @@ namespace DersPrgProjesi.Controllers
         [HttpGet]
         public IActionResult FakulteKayıt()
         {
+            //var userType = HttpContext.Session.GetString("UserType");
+            //if (userType != "Admin")
+            //{
+            //    TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+            //    return RedirectToAction("Index", "Home");
+            //}
+            //var sınıflar = _context.Sınıflar.ToList();
+            //return View("kullanıcıkayıt",sınıflar);
+
             var userType = HttpContext.Session.GetString("UserType");
-            if (userType != "Admin")
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
+
+            // Sınıfları filtrele
+            List<Sınıf> sınıflar;
+
+            if (userType == "Admin")
             {
+                // Admin tüm sınıfları görür
+                sınıflar = _context.Sınıflar.ToList();
+            }
+            else if (userType == "Fakulte" || userType == "Bolum")
+            {
+                // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
+                sınıflar = _context.Sınıflar
+                    .Where(s => s.FakulteID == fakulteNo)
+                    .ToList();
+            }
+            else
+            {
+                // Eğer kullanıcı tipi tanımlı değilse, hata mesajı ile geri döndür
                 TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
             }
-            var sınıflar = _context.Sınıflar.ToList();
-            return View("kullanıcıkayıt",sınıflar);
+
+            // Sınıfları View'e gönder
+            return View("bolumekle", sınıflar);
         }
         public IActionResult KullanıcıKayıt()
         {

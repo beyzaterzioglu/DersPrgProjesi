@@ -18,15 +18,44 @@ namespace DersPrgProjesi.Controllers
         [HttpGet]
         public IActionResult BolumEkle()
         {
+            //var userType = HttpContext.Session.GetString("UserType");
+            //if (userType != "Admin" && userType != "Fakulte")
+            //{
+            //    TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
+            //    return RedirectToAction("Index", "Home");
+            //}
+            //var sınıflar = _context.Sınıflar.ToList();
+
+            //return View("bolumekle", sınıflar);
+
+            // Kullanıcı tipini ve FakülteNo'yu oturumdan al
             var userType = HttpContext.Session.GetString("UserType");
-            if (userType != "Admin" && userType!="Fakulte")
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
+
+            // Sınıfları filtrele
+            List<Sınıf> sınıflar;
+
+            if (userType == "Admin")
             {
+                // Admin tüm sınıfları görür
+                sınıflar = _context.Sınıflar.ToList();
+            }
+            else if (userType == "Fakulte" || userType == "Bolum")
+            {
+                // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
+                sınıflar = _context.Sınıflar
+                    .Where(s => s.FakulteID == fakulteNo)
+                    .ToList();
+            }
+            else
+            {
+                // Eğer kullanıcı tipi tanımlı değilse, hata mesajı ile geri döndür
                 TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
             }
-            var sınıflar = _context.Sınıflar.ToList();
 
-            return View("bolumekle",sınıflar);
+            // Sınıfları View'e gönder
+            return View("bolumekle", sınıflar);
         }
         public IActionResult KullanıcıKayıt()
         {

@@ -30,6 +30,8 @@ namespace DersPrgProjesi.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Login(string Username, string Password)
         {
+
+
             // Admin kontrolü
             var admin = _context.Admins
                 .FirstOrDefault(a => a.Username == Username && a.Password == Password);
@@ -45,6 +47,7 @@ namespace DersPrgProjesi.Controllers
             if (faculty != null)
             {
                 HttpContext.Session.SetString("UserType", "Fakulte");
+                HttpContext.Session.SetInt32("FakulteID", faculty.FakulteID); // Fakülte ID kaydediliyor
                 return RedirectToAction("Index");
             }
 
@@ -54,6 +57,7 @@ namespace DersPrgProjesi.Controllers
             if (department != null)
             {
                 HttpContext.Session.SetString("UserType", "Bolum");
+                HttpContext.Session.SetInt32("BolumID", department.BolumID); // Bölüm ID kaydediliyor
                 return RedirectToAction("Index");
             }
 
@@ -72,16 +76,56 @@ namespace DersPrgProjesi.Controllers
 
         public IActionResult Index()
         {
+            //// Oturum kontrolü yap
+            //if (HttpContext.Session.GetString("UserType") == null)
+            //{
+            //    // Eðer oturum açýlmamýþsa, Login sayfasýna yönlendir
+            //    return RedirectToAction("Login");
+            //}
+
+            //var sýnýflar = _context.Sýnýflar.ToList(); // Sýnýf verisini alýyoruz 
+
+            //return View("index", sýnýflar); // index.cshtml
+
             // Oturum kontrolü yap
-            if (HttpContext.Session.GetString("UserType") == null)
+            var userType = HttpContext.Session.GetString("UserType");
+            if (string.IsNullOrEmpty(userType))
             {
                 // Eðer oturum açýlmamýþsa, Login sayfasýna yönlendir
                 return RedirectToAction("Login");
             }
 
-            var sýnýflar = _context.Sýnýflar.ToList(); // Sýnýf verisini alýyoruz 
+            // Kullanýcý türüne göre sýnýflarý filtrele
+            var sýnýflar = new List<Sýnýf>();
 
-            return View("index", sýnýflar); // index.cshtml
+            if (userType == "Admin")
+            {
+                // Admin tüm sýnýflarý görebilir
+                sýnýflar = _context.Sýnýflar.ToList();
+            }
+            else if (userType == "Fakulte")
+            {
+                // Fakülte sadece kendi fakültesine ait sýnýflarý görebilir
+                var fakulteId = HttpContext.Session.GetInt32("FakulteID");
+                sýnýflar = _context.Sýnýflar
+                    .Where(s => s.FakulteID == fakulteId) // FakülteID ile filtrele
+                    .ToList();
+            }
+            else if (userType == "Bolum")
+            {
+                // Bölüm sadece kendi fakültesine ait sýnýflarý görebilir
+                var bolumId = HttpContext.Session.GetInt32("BolumID");
+                var bolum = _context.Bolumler.FirstOrDefault(b => b.BolumID == bolumId);
+
+                if (bolum != null)
+                {
+                    sýnýflar = _context.Sýnýflar
+                        .Where(s => s.FakulteID == bolum.FakulteID) // Bölümün fakülte ID'sine göre filtrele
+                        .ToList();
+                }
+            }
+
+            return View("index", sýnýflar); // index.cshtml'e sýnýf listesini gönder
         }
         public IActionResult BolumEkle() // Anasayfa
         {
@@ -116,24 +160,101 @@ namespace DersPrgProjesi.Controllers
             //}
             //return View("index"); 
 
-            var sýnýflar = _context.Sýnýflar
-        .Include(s => s.Fakulte)  // Fakülte bilgilerini de dahil ediyoruz
-        .ToList();
+        //    var sýnýflar = _context.Sýnýflar
+        //.Include(s => s.Fakulte)  // Fakülte bilgilerini de dahil ediyoruz
+        //.ToList();
+
+        //    if (sýnýflar != null && sýnýflar.Any())
+        //    {
+        //        return View("tables-data", sýnýflar); // Fakülte bilgisiyle birlikte model gönderiyoruz.
+        //    }
+        //    return View("index"); // Eðer veriler boþsa index'e yönlendiririz
+
+
+
+            // Kullanýcý tipini ve FakülteNo'yu oturumdan al
+            var userType = HttpContext.Session.GetString("UserType");
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
+
+            List<Sýnýf> sýnýflar;
+
+            if (userType == "Admin")
+            {
+                // Admin tüm sýnýflarý görebilir
+                sýnýflar = _context.Sýnýflar
+                    .Include(s => s.Fakulte) // Fakülte bilgilerini de dahil ediyoruz
+                    .ToList();
+            }
+            else if (userType == "Fakulte" || userType == "Bolum")
+            {
+                // Fakülte ve Bölüm kullanýcýlarý yalnýzca kendi fakültelerine ait sýnýflarý görür
+                sýnýflar = _context.Sýnýflar
+                    .Include(s => s.Fakulte) // Fakülte bilgilerini dahil ediyoruz
+                    .Where(s => s.FakulteID == fakulteNo)
+                    .ToList();
+            }
+            else
+            {
+                // Geçersiz bir kullanýcý tipi ile karþýlaþýlýrsa ana sayfaya yönlendir
+                TempData["ErrorMessage"] = "Bu sayfaya eriþim yetkiniz yok.";
+                return RedirectToAction("Index", "Home");
+            }
 
             if (sýnýflar != null && sýnýflar.Any())
             {
-                return View("tables-data", sýnýflar); // Fakülte bilgisiyle birlikte model gönderiyoruz.
+                return View("tables-data", sýnýflar); // Modeli doðru þekilde View'a gönderiyoruz
             }
-            return View("index"); // Eðer veriler boþsa index'e yönlendiririz
+
+            return View("index"); // Eðer sýnýflar boþsa ana sayfaya yönlendiriyoruz
         }
 
         public IActionResult TablesGeneral(int sýnýfID)
         {
-            var sýnýflar = _context.Sýnýflar.ToList();
+            //var sýnýflar = _context.Sýnýflar.ToList();
 
 
 
-            return View("tables-general",sýnýflar);
+            //return View("tables-general",sýnýflar);
+
+
+            // Kullanýcý tipini ve FakülteNo'yu oturumdan al
+            var userType = HttpContext.Session.GetString("UserType");
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
+
+            List<Sýnýf> sýnýflar;
+
+            if (userType == "Admin")
+            {
+                // Admin tüm sýnýflarý görebilir
+                sýnýflar = _context.Sýnýflar
+                    .Include(s => s.Fakulte)
+                    .ToList();
+            }
+            else if (userType == "Fakulte" || userType == "Bolum")
+            {
+                // Fakülte ve Bölüm kullanýcýlarý yalnýzca kendi fakültelerine ait sýnýflarý görür
+                sýnýflar = _context.Sýnýflar
+                    .Include(s => s.Fakulte)
+                    .Where(s => s.FakulteID == fakulteNo)
+                    .ToList();
+            }
+            else
+            {
+                // Geçersiz bir kullanýcý tipi ile karþýlaþýlýrsa ana sayfaya yönlendir
+                TempData["ErrorMessage"] = "Bu sayfaya eriþim yetkiniz yok.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Eðer spesifik bir sýnýfID kontrolü gerekiyorsa:
+            var selectedClass = sýnýflar.FirstOrDefault(s => s.SýnýfID == sýnýfID);
+
+            if (selectedClass != null)
+            {
+                return View("tables-general", selectedClass); // Seçilen sýnýfý View'a gönderiyoruz
+            }
+
+            TempData["ErrorMessage"] = "Belirtilen sýnýf bulunamadý.";
+            return RedirectToAction("TablesData");
         }
 
 
