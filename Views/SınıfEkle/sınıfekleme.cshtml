@@ -104,7 +104,8 @@
                     @foreach (var sınıf in Model)
                     {
                         <li>
-                            <a href="/Home/TablesGeneral/@sınıf.SınıfID">
+                            <a href="@Url.Action("TablesGeneral", "Home", new { id = sınıf.SınıfID })">
+                                @sınıf.SınıfAd
                                 <i class="bi bi-circle"></i><span>@sınıf.SınıfAd</span>
                             </a>
                         </li>
