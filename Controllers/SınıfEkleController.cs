@@ -123,6 +123,14 @@ namespace DersPrgProjesi.Controllers
             return View("sınıfekleme", mevcutSınıflar);
         }
 
-
+        [HttpGet]
+        [Route("api/SinifEkle/GetSiniflar")]
+        public IActionResult GetFakulteler()
+        {
+            var sınıflar = _context.Sınıflar
+                          .Select(f => new { f.SınıfAd })
+                          .ToList();
+            return Ok(sınıflar);
+        }
     }
 }

@@ -1,4 +1,4 @@
-@model IEnumerable<DersPrgProjesi.Models.Sınıf>
+﻿@model IEnumerable<DersPrgProjesi.Models.Sınıf>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,6 +52,7 @@
             <i class="bi bi-list toggle-sidebar-btn"></i>
         </div>
         <!-- End Logo -->
+        <!-- End Search Bar -->
 
         <nav class="header-nav ms-auto">
             <ul class="d-flex align-items-center">
@@ -78,6 +79,7 @@
 
             </ul>
         </nav>
+
 
     </header><!-- End Header -->
     <!-- ======= Sidebar ======= -->
@@ -129,39 +131,56 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Kullanıcı Ekleme</h1>
+            <h1>Oturum Ekleme</h1>
         </div><!-- End Page Title -->
 
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Kayıt için gereki bilgilerini doldurunuz.</h5>
+                <h5 class="card-title">Oturum bilgilerini doldurunuz.</h5>
 
                 <!-- Vertical Form -->
-                @using (Html.BeginForm("FakulteKayıt", "FakulteKayıt", FormMethod.Post))
+                @using (Html.BeginForm("OturumEkle", "OturumEkle", FormMethod.Post))
                 {
+
+                    <input type="hidden" id="SınıfID" name="SınıfID" />
+
+                        <div class="col-12">
+                            <label for="gun" class="form-label">Oturum Günü</label>
+                            <select class="form-control" id="gun" name="Gun" required>
+                                <option value="Monday">Pazartesi</option>
+                                <option value="Tuesday">Salı</option>
+                                <option value="Wednesday">Çarşamba</option>
+                                <option value="Thursday">Perşembe</option>
+                                <option value="Friday">Cuma</option>
+                                <option value="Saturday">Cumartesi</option>
+                                <option value="Sunday">Pazar</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="baslangicSaati" class="form-label">Başlangıç Saati</label>
+                            <input type="time" class="form-control" id="baslangicSaati" name="BaslangicSaati" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="bitisSaati" class="form-label">Bitiş Saati</label>
+                            <input type="time" class="form-control" id="bitisSaati" name="BitisSaati" required>
+                        </div>
                     <div class="col-12">
-                        <label for="inputName" class="form-label">Fakülte/Yüksekokul Adı</label>
-                        <input type="text" class="form-control" id="inputName" name="FakulteAd">
+                        <label for="fakulteSelect" class="form-label">Sınıf </label>
+                        <select class="form-select" id="sinifSelect" name="SınıfAd">
+                            <option selected>Sınıf Seçin</option>
+                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                        </select>
                     </div>
-                    <div class="col-12">
-                        <label for="inputEmail" class="form-label">Fakülte/Yüksekokul Maili</label>
-                        <input type="email" class="form-control" id="inputEmail" name="FakulteMail">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPassword" class="form-label">Fakülte/Yüksekokul Şifresi</label>
-                        <input type="password" class="form-control" id="inputPassword" name="FakulteSifre">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPasswordRepeat" class="form-label">Fakülte/Yüksekokul Şifresi Tekrar</label>
-                        <input type="password" class="form-control" id="inputPasswordRepeat" name="inputPasswordRepeat">
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-outline-primary">Kayıt</button>
-                    </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-outline-primary">Kaydet</button>
+                        </div>
+                   
                 }
 
             </div>
-        </div>
+        </div><!-- End Card Body -->
 
     </main><!-- End #main -->
     <!-- ======= Footer ======= -->
@@ -181,13 +200,43 @@
     <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/vendor/chart.js/chart.umd.js"></script>
     <script src="~/assets/vendor/echarts/echarts.min.js"></script>
-    <script src="~/assets/vendor/quill/quill.js"></script>
+    <script src="~/assets/vendor/quill/quill.min.js"></script>
     <script src="~/assets/vendor/simple-datatables/simple-datatables.js"></script>
     <script src="~/assets/vendor/tinymce/tinymce.min.js"></script>
     <script src="~/assets/vendor/php-email-form/validate.js"></script>
 
     <!-- Template Main JS File -->
-    <script src="~/assets/js/main.js"></script>
+    <script src="~/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://localhost:7142/api/SinifEkle/GetSiniflar')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById("sinifSelect");
+                    const hiddenInput = document.getElementById("SınıfID"); // Gizli input alanı
+                    data.forEach(sınıf => {
+                        const option = document.createElement("option");
+                        option.value = sınıf.sınıfAd; // Görünür metin olarak sınıf adı
+                        option.textContent = sınıf.sınıfAd; // Seçilen sınıf adı
+                        select.appendChild(option);
+                    });
+
+                    // Seçilen sınıf adına göre SınıfID'yi gizli inputa yerleştir
+                    select.addEventListener("change", function () {
+                        const selectedClass = select.value; // Seçilen sınıf adı
+                        const selectedSınıf = data.find(s => s.sınıfAd === selectedClass); // Seçilen sınıfın ID'sini bul
+                        if (selectedSınıf) {
+                            hiddenInput.value = selectedSınıf.sınıfID; // SınıfID'yi gizli inputa yaz
+                        }
+                        else {
+                            hiddenInput.value = ""; // Hatalı seçimde ID temizlenir
+                        }
+                        console.log("Hidden Input Değeri:", hiddenInput.value); // Kontrol
+                    });
+                })
+                .catch(error => console.error("Sınıflar yüklenirken bir hata oluştu:", error));
+        });
+    </script>
 
 </body>
 
