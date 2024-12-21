@@ -240,31 +240,50 @@ namespace DersPrgProjesi.Controllers
             var oturumlar = _context.Oturumlar
             .Where(o => o.SýnýfID == sýnýfID) // SýnýfID'ye göre oturumlarý filtrele
              .ToList();
+
+            // Sýnýfa ait oturumlarý filtrele
+           
+            var gunler = oturumlar.Select(o => o.Gun).Distinct().OrderBy(g => g).ToList();
+            var saatler = oturumlar
+     .Select(o => new SaatAraligi { BaslangicSaati = o.BaslangicSaati, BitisSaati = o.BitisSaati })
+     .Distinct()
+     .ToList();
+
+            Console.WriteLine("Sýnýflar Sayýsý: " + sýnýflar.Count());
+            ViewBag.Saatler = saatler;
+
+
+            ViewBag.SelectedClassName = selectedClass.SýnýfAd; // View'da kullanmak için
+            ViewBag.Gunler = gunler;
+            ViewBag.Oturumlar = oturumlar;
+         
+            ViewBag.Sýnýflar = sýnýflar; // Sýnýflar
+
             // Seçilen sýnýfý View'e gönder
-            return View("tables-general", sýnýflar);
+            return View("tables-general");
 
 
         }
-        public IActionResult DersEkle(int sýnýfID)
-        {
-            // Oturumdaki kullanýcý bilgilerini al
-            var userType = HttpContext.Session.GetString("UserType");
-            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
+        //public IActionResult DersEkle(int sýnýfID)
+        //{
+        //    // Oturumdaki kullanýcý bilgilerini al
+        //    var userType = HttpContext.Session.GetString("UserType");
+        //    var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
 
-            if (userType == null)
-            {
-                TempData["ErrorMessage"] = "Giriþ yapmanýz gerekiyor.";
-                return RedirectToAction("Login", "Account"); // Kullanýcý giriþ yapmamýþsa yönlendirme yap
-            }
+        //    if (userType == null)
+        //    {
+        //        TempData["ErrorMessage"] = "Giriþ yapmanýz gerekiyor.";
+        //        return RedirectToAction("Login", "Account"); // Kullanýcý giriþ yapmamýþsa yönlendirme yap
+        //    }
 
-            // Kullanýcýya göre sýnýflarý filtrele
-            List<Sýnýf> sýnýflar = _context.Sýnýflar
-                .Include(s => s.Fakulte)
-                .Where(s => userType == "Admin" || s.FakulteID == fakulteNo)
-                .ToList();
+        //    // Kullanýcýya göre sýnýflarý filtrele
+        //    List<Sýnýf> sýnýflar = _context.Sýnýflar
+        //        .Include(s => s.Fakulte)
+        //        .Where(s => userType == "Admin" || s.FakulteID == fakulteNo)
+        //        .ToList();
 
-            return View("dersekleme", sýnýflar);
-        }
+        //    return View("dersekleme", sýnýflar);
+        //}
 
 
             public IActionResult Privacy()

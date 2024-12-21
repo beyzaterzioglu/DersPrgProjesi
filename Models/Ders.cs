@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DersPrgProjesi.Models
 {
-    public class Oturum
+    public class Ders
     {
+
+
         [Key]
         public int OturumId { get; set; } // Primary Key
 
@@ -19,12 +19,13 @@ namespace DersPrgProjesi.Models
         public DayOfWeek Gun { get; set; } // Haftanın günü (Pazartesi, Salı vb.)
 
         public int? SınıfID { get; set; } // Foreign Key (Sınıf tablosuna bağlanacak)
-        public virtual Sınıf Sınıf{ get; set; }
-        //[Required]
-        //public string DersAdi { get; set; } // Ders adı
+        public virtual Sınıf Sınıf { get; set; }
+        [Required]
+        public string DersAdi { get; set; } // Ders adı
 
-        //[Required]
-        //public string BolumAdi { get; set; } // Bölüm adı
+        [Required]
+        public string BolumAdi { get; set; } // Bölüm adı
+
 
     }
 }

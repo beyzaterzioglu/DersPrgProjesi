@@ -139,13 +139,14 @@
                 <h5 class="card-title">Oturum bilgilerini doldurunuz.</h5>
 
                 <!-- Vertical Form -->
-                @using (Html.BeginForm("OturumEkle", "OturumEkle", FormMethod.Post))
+                @using (Html.BeginForm("DersEkleme", "DersEkleme", FormMethod.Post))
                 {
 
                     <input type="hidden" id="SınıfID" name="SınıfID" />
 
+                    
                         <div class="col-12">
-                            <label for="gun" class="form-label">Oturum Günü</label>
+                            <label for="gun" class="form-label">Ders Günü</label>
                             <select class="form-control" id="gun" name="Gun" required>
                                 <option value="Monday">Pazartesi</option>
                                 <option value="Tuesday">Salı</option>
@@ -156,6 +157,20 @@
                                 <option value="Sunday">Pazar</option>
                             </select>
                         </div>
+
+
+                    <div class="col-12">
+                        <label for="inputName" class="form-label">Ders Adı</label>
+                        <input type="text" class="form-control" id="inputName" name="DersAdi">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="BolumSelectt" class="form-label">Bölüm</label>
+                        <select class="form-select" id="BolumSelect" name="BolumAd">
+                            <option selected>Bölüm Seçin</option>
+                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                        </select>
+                    </div>
 
                         <div class="col-12">
                             <label for="baslangicSaati" class="form-label">Başlangıç Saati</label>

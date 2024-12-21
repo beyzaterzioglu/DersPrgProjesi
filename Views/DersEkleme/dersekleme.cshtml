@@ -1,3 +1,4 @@
+@model IEnumerable<DersPrgProjesi.Models.Sınıf>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -138,33 +139,29 @@
                 <h5 class="card-title">Ders bilgilerini doldurunuz.</h5>
 
                 <!-- Vertical Form -->
-                <form class="row g-3">
+                @using (Html.BeginForm("DersEkleme", "DersEkleme", FormMethod.Post))
+                {
                     <div class="col-12">
-                        <label for="inputNanme4" class="form-label">Ders Adı</label>
-                        <input type="text" class="form-control" id="inputNanme4">
+                        <label for="inputName" class="form-label">Ders Adı</label>
+                        <input type="text" class="form-control" id="inputName" name="DersAdi">
                     </div>
+                    
                     <div class="col-12">
-                        <label for="inputEmail4" class="form-label">Dersin ait olduğu bölüm</label>
-                        <input type="text" class="form-control" id="inputEmail4">
+                        <label for="BolumSelectt" class="form-label">Bölüm</label>
+                        <select class="form-select" id="BolumSelect" name="BolumAd">
+                            <option selected>Bölüm Seçin</option>
+                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                        </select>
                     </div>
-                    <div class="col-12">
-                        <label for="inputEmail4" class="form-label">Dersin günü</label>
-                        <input type="text" class="form-control" id="inputDate">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPassword4" class="form-label">Ders Başlangıç Saati</label>
-                        <input type="text" class="form-control" id="inputPassword4">
-                    </div>
-                    <div class="col-12">
-                        <label for="inputPassword4" class="form-label">Ders Bitiş Saati</label>
-                        <input type="text" class="form-control" id="inputPassword4">
-                    </div>
+                    <input type="hidden" id="inputDay" name="DersGunu">
+                    <input type="hidden" id="inputStartTime" name="BaslangicSaati">
+                    <input type="hidden" id="inputEndTime" name="BitisSaati">
+                    <input type="hidden" id="SinifHiddenField" name="SinifAdi">
                     <div class="text-center">
-                        <button type="button" class="btn btn-outline-primary" onclick="window.location.href='/Home/TablesGeneral'">
-                            Kayıt
-                        </button>
+                        <button type="submit" class="btn btn-primary">Kayıt</button>
                     </div>
-                </form><!-- Vertical Form -->
+                }
+                <!-- Vertical Form -->
 
             </div>
         </div><!-- End Card Body -->
@@ -194,6 +191,22 @@
 
     <!-- Template Main JS File -->
     <script src="~/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://localhost:7142/api/DersEkleme/GetBolumler') // Fakülte adlarını getiren API endpoint'i
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById("BolumSelect");
+                    data.forEach(bolum=> {
+                        const option = document.createElement("option");
+                        option.value = bolum.bolumAd;  // Fakülte Adı
+                        option.textContent = bolum.bolumAd;; // Fakülte Adı
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Fakülteler yüklenirken bir hata oluştu:", error));
+        });
+    </script>
 
 </body>
 
