@@ -49,7 +49,7 @@ namespace DersPrgProjesi.Controllers
             }
 
             // Sınıfları View'e gönder
-            return View("bolumekle", sınıflar);
+            return View("~/Views/SınıfEkle/sınıfekleme.cshtml", sınıflar);
         }
 
         // POST: SınıfEkle
