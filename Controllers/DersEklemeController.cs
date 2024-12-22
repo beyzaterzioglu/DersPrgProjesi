@@ -46,11 +46,11 @@ namespace DersPrgProjesi.Controllers
         //    }
 
         //    // Sınıfları View'e gönder
-        //    return View("tablesgeneral", sınıflar);
+        //    return View("~/Views/Home/tables-general.cshtml", sınıflar);
         //}
 
-
-        public IActionResult DersEkleme(TimeSpan BaslangicSaati, TimeSpan BitisSaati, DayOfWeek Gun, string SınıfAd)
+        [HttpPost]
+        public IActionResult DersEkleme(string DersAdi, string BolumAd, DayOfWeek Gun, TimeSpan BaslangicSaati, TimeSpan BitisSaati, int SınıfID)
         {
 
             var userType = HttpContext.Session.GetString("UserType");
@@ -76,36 +76,36 @@ namespace DersPrgProjesi.Controllers
 
 
 
-            //if (ModelState.IsValid)
-            //{
-            //    // Sınıf ID'yi bulmak için SınıfAd'ı kullan
-            //    var sınıfId = _context.Sınıflar
-            //        .Where(s => s.SınıfAd == SınıfAd)
-            //        .Select(s => s.SınıfID)
-            //        .FirstOrDefault();
+            if (ModelState.IsValid)
+            {
+                // Sınıf ID'yi bulmak için SınıfAd'ı kullan
+                var mevcutSınıf = _context.Sınıflar
+            .FirstOrDefault(s => s.SınıfID == SınıfID);
 
-            //    if (sınıfId == 0)
-            //    {
-            //        ModelState.AddModelError("SınıfAd", "Seçilen sınıf bulunamadı.");
-            //        return View();
-            //    }
+                if (mevcutSınıf == null)
+                {
+                    ModelState.AddModelError("SınıfID", "Seçilen sınıf bulunamadı.");
+                    return View("~/Views/DersEkleme/DersEkleme.cshtml", sınıflar);
+                }
 
-            //    // Yeni Oturum nesnesi oluştur
-            //    var yeniDers = new Ders
-            //    {
-            //        BaslangicSaati = BaslangicSaati,
-            //        BitisSaati = BitisSaati,
-            //        Gun = Gun,
-            //        SınıfID = sınıfId
-            //    };
+                // Yeni Oturum nesnesi oluştur
+                var yeniDers = new EklenenDers
+                {
+                    DersAdi = DersAdi,
+                    BolumAdi = BolumAd,
+                    Gun = Gun,
+                    BaslangicSaati = BaslangicSaati,
+                    BitisSaati = BitisSaati,
+                    SınıfID = SınıfID
+                };
 
-            //    // Veritabanına kaydet
-            //    _context.Ders.Add(yeniDers);
-            //    _context.SaveChanges();
+                // Veritabanına kaydet
+                _context.EklenenDersler.Add(yeniDers);
+                _context.SaveChanges();
 
-            //    // Başarıyla yönlendir
-            //    return View("tablesgeneral", sınıflar);
-            //}
+                // Başarıyla yönlendir
+                return View("tablesgeneral", sınıflar);
+            }
 
             // Eğer ModelState hatalıysa aynı sayfaya dön
             return View("~/Views/OturumEkle/OturumEkle.cshtml", sınıflar);

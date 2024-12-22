@@ -25,7 +25,8 @@ namespace DersPrgProjesi.Data
         public DbSet<Bolum> Bolumler { get; set; }
         public DbSet<Sınıf> Sınıflar { get; set; }
         public DbSet<Oturum> Oturumlar { get; set; }
-        public DbSet<Ders> Ders { get; set; }
+        //public DbSet<Ders> Ders { get; set; }
+        public DbSet<EklenenDers> EklenenDersler { get; set; }
 
     }
 }

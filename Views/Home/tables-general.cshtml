@@ -1,10 +1,13 @@
 @{
-    var dersListesi = ViewBag.Oturumlar as IEnumerable<Ders> ?? Enumerable.Empty<Ders>();
+    var dersListesi = ViewBag.Oturumlar as IEnumerable<EklenenDers> ?? Enumerable.Empty<EklenenDers>();
     var saatlerListesi = ViewBag.Saatler as IEnumerable<SaatAraligi> ?? Enumerable.Empty<SaatAraligi>();
     var gunlerListesi = ViewBag.Gunler as IEnumerable<DayOfWeek> ?? Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>();
     var sınıfAdı = ViewBag.SelectedClassName as string ?? "Belirtilmedi";
     var sınıflarListesi = ViewBag.Sınıflar as IEnumerable<Sınıf> ?? Enumerable.Empty<Sınıf>();
-    }
+    var bolumListesi = ViewBag.Bolumler as IEnumerable<string> ?? Enumerable.Empty<string>(); // Bölüm adlarını ekle
+
+    var siraliSaatlerListesi = saatlerListesi.OrderBy(s => s.BaslangicSaati).ToList();
+}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -168,7 +171,13 @@
 
       <div class="container mt-5">
         <h2 class="text-center mb-4">Ders Programı</h2>
-                <a href="/DersEkleme/DersEkleme" class="btn btn-primary">Ders Ekle</a>
+                <a href="/OturumEkle/OturumEkle">
+                    <i class="bi bi-link"></i><span>Ders Ekle</span>
+                </a>
+
+                @*  <a href="/OturumEkle/OturumEkle" class="btn btn-primary">Ders Ekle</a> *@
+
+
         @* <table class="table table-bordered">
           <thead>
             <tr>
@@ -193,7 +202,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var saat in saatlerListesi)
+                        @foreach (var saat in siraliSaatlerListesi)
                         {
                             <tr>
                                 <td>@saat.BaslangicSaati.ToString(@"hh\:mm") - @saat.BitisSaati.ToString(@"hh\:mm")</td>
@@ -205,18 +214,19 @@
                                     if (ders!= null)
                                     {
                                         <td>
-                                            <div class="label">Bölüm</div>
-                                            <div class="label">Ders Adı</div>
-
-                                            
-                                            
-                                         
-
+                                            <div class="label"><strong>Bölüm:</strong> @ders.BolumAdi</div>
+                                            <div class="label"><strong>Ders:</strong> @ders.DersAdi</div>
+                                  
                                         </td>
                                     }
                                     else
                                     {
-                                        <td></td>
+                                        <td>
+                                            <a href="/OturumEkle/OturumEkle">
+                                                <i class="bi bi-link"></i><span>Ders Ekle</span>
+                                            </a>
+                                       
+                                        </td>
                                     }
                                 }
                             </tr>

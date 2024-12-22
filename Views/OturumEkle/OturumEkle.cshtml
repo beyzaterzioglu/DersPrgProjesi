@@ -139,7 +139,7 @@
                 <h5 class="card-title">Oturum bilgilerini doldurunuz.</h5>
 
                 <!-- Vertical Form -->
-                @using (Html.BeginForm("DersEkleme", "DersEkleme", FormMethod.Post))
+                @using (Html.BeginForm("OturumEkle", "OturumEkle", FormMethod.Post))
                 {
 
                     <input type="hidden" id="SınıfID" name="SınıfID" />
@@ -166,12 +166,18 @@
 
                     <div class="col-12">
                         <label for="BolumSelectt" class="form-label">Bölüm</label>
-                        <select class="form-select" id="BolumSelect" name="BolumAd">
+                        <select class="form-select" id="BolumSelect" name="BolumAdi">
                             <option selected>Bölüm Seçin</option>
                             <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
                         </select>
                     </div>
-
+                    <div class="col-12">
+                        <label for="fakulteSelect" class="form-label">Sınıf </label>
+                        <select class="form-select" id="sinifSelect" name="SınıfAdı">
+                            <option selected>Sınıf Seçin</option>
+                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
+                        </select>
+                    </div>
                         <div class="col-12">
                             <label for="baslangicSaati" class="form-label">Başlangıç Saati</label>
                             <input type="time" class="form-control" id="baslangicSaati" name="BaslangicSaati" required>
@@ -181,13 +187,7 @@
                             <label for="bitisSaati" class="form-label">Bitiş Saati</label>
                             <input type="time" class="form-control" id="bitisSaati" name="BitisSaati" required>
                         </div>
-                    <div class="col-12">
-                        <label for="fakulteSelect" class="form-label">Sınıf </label>
-                        <select class="form-select" id="sinifSelect" name="SınıfAd">
-                            <option selected>Sınıf Seçin</option>
-                            <!-- Fakülte adlarını buraya ekleyecek JS kodu çalışacak -->
-                        </select>
-                    </div>
+                    
                         <div class="text-center">
                             <button type="submit" class="btn btn-outline-primary">Kaydet</button>
                         </div>
@@ -250,6 +250,23 @@
                     });
                 })
                 .catch(error => console.error("Sınıflar yüklenirken bir hata oluştu:", error));
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://localhost:7142/api/DersEkleme/GetBolumler') // Fakülte adlarını getiren API endpoint'i
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById("BolumSelect");
+                    data.forEach(bolum => {
+                        const option = document.createElement("option");
+                        option.value = bolum.bolumAd;  // Fakülte Adı
+                        option.textContent = bolum.bolumAd;; // Fakülte Adı
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Fakülteler yüklenirken bir hata oluştu:", error));
         });
     </script>
 

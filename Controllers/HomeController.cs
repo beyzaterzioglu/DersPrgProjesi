@@ -197,69 +197,130 @@ namespace DersPrgProjesi.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            if (sýnýflar != null && sýnýflar.Any())
+            if ( sýnýflar.Any())
             {
                 return View("tables-data", sýnýflar); // Modeli doðru þekilde View'a gönderiyoruz
             }
 
-            return View("index"); // Eðer sýnýflar boþsa ana sayfaya yönlendiriyoruz
+            return View("index",sýnýflar); // Eðer sýnýflar boþsa ana sayfaya yönlendiriyoruz
         }
 
         [Route("Home/TablesGeneral/{sýnýfID}")]
         public IActionResult TablesGeneral(int sýnýfID)
         {
 
-            Console.WriteLine("SýnýfID: " + sýnýfID); // Konsola yazdýrarak kontrol edebilirsiniz
-            /// Oturumdaki kullanýcý bilgilerini al
+            //       Console.WriteLine("SýnýfID: " + sýnýfID); // Konsola yazdýrarak kontrol edebilirsiniz
+            //       /// Oturumdaki kullanýcý bilgilerini al
+            //       var userType = HttpContext.Session.GetString("UserType");
+            //       var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
+
+            //       if (userType == null)
+            //       {
+            //           TempData["ErrorMessage"] = "Giriþ yapmanýz gerekiyor.";
+            //           return RedirectToAction("Login", "Account"); // Kullanýcý giriþ yapmamýþsa yönlendirme yap
+            //       }
+
+            //       // Kullanýcýya göre sýnýflarý filtrele
+            //       List<Sýnýf> sýnýflar = _context.Sýnýflar
+            //           .Include(s => s.Fakulte)
+            //           .Where(s => userType == "Admin" || s.FakulteID == fakulteNo)
+            //           .ToList();
+
+            //       // SýnýfID'ye göre belirli bir sýnýfý filtrele
+
+            //       var selectedClass = sýnýflar.FirstOrDefault(s => s.SýnýfID == sýnýfID);
+
+
+            //       if (selectedClass == null)
+            //       {
+            //           TempData["ErrorMessage"] = "Seçilen sýnýf bulunamadý veya eriþim izniniz yok.";
+            //           return RedirectToAction("TablesData"); // Geri yönlendirme
+            //       }
+
+            //       var dersler = _context.EklenenDersler
+            //       .Where(o => o.SýnýfID == sýnýfID) // SýnýfID'ye göre oturumlarý filtrele
+            //        .ToList();
+
+            //      // Sýnýfa ait oturumlarý filtrele
+
+
+            //       var gunler = dersler.Select(o => o.Gun).Distinct().OrderBy(g => g).ToList();
+            //       var saatler = dersler
+            //.Select(o => new SaatAraligi { BaslangicSaati = o.BaslangicSaati, BitisSaati = o.BitisSaati })
+            //.Distinct()
+            //.ToList();
+
+            //       var bolumler = dersler.Select(d => d.BolumAdi).Distinct().OrderBy(b => b).ToList();
+
+            //       Console.WriteLine("Sýnýflar Sayýsý: " + sýnýflar.Count());
+            //       ViewBag.Saatler = saatler;
+
+
+            //       ViewBag.SelectedClassName = selectedClass.SýnýfAd; // View'da kullanmak için
+            //       ViewBag.Gunler = gunler;
+            //       ViewBag.Oturumlar = dersler;
+            //       ViewBag.Bolumler= bolumler; 
+
+            //       ViewBag.Sýnýflar = sýnýflar; // Sýnýflar
+
+
+            //       // Seçilen sýnýfý View'e gönder
+            //       return View("tables-general");
+
+            // Fakülte numarasýný oturumdan alýyoruz (giriþ yapmýþsa)
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID");
+
+            // Kullanýcý tipi oturumda var mý, kontrol edelim
             var userType = HttpContext.Session.GetString("UserType");
-            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarasý
 
-            if (userType == null)
-            {
-                TempData["ErrorMessage"] = "Giriþ yapmanýz gerekiyor.";
-                return RedirectToAction("Login", "Account"); // Kullanýcý giriþ yapmamýþsa yönlendirme yap
-            }
-
-            // Kullanýcýya göre sýnýflarý filtrele
+            // Sýnýflarý çekiyoruz ve Admin veya Fakülteye göre filtreliyoruz
             List<Sýnýf> sýnýflar = _context.Sýnýflar
                 .Include(s => s.Fakulte)
-                .Where(s => userType == "Admin" || s.FakulteID == fakulteNo)
-                .ToList();
+                .ToList(); // Tüm sýnýflarý alýyoruz, sadece filtreyi uyguluyoruz
 
-            // SýnýfID'ye göre belirli bir sýnýfý filtrele
+            // Eðer kullanýcý Admin ise veya fakülte numarasý eþleþiyorsa sýnýflarý filtreliyoruz
+            if (userType == "Admin")
+            {
+                // Admin tüm sýnýflarý görebilir, ekstra bir filtrelemeye gerek yok
+            }
+            else if (fakulteNo.HasValue)
+            {
+                // Eðer fakülte numarasý varsa, sadece o fakülteye ait sýnýflarý alýyoruz
+                sýnýflar = sýnýflar.Where(s => s.FakulteID == fakulteNo.Value).ToList();
+            }
 
+            // Seçilen sýnýfý filtreliyoruz
             var selectedClass = sýnýflar.FirstOrDefault(s => s.SýnýfID == sýnýfID);
-
 
             if (selectedClass == null)
             {
-                TempData["ErrorMessage"] = "Seçilen sýnýf bulunamadý veya eriþim izniniz yok.";
+                TempData["ErrorMessage"] = "Seçilen sýnýf bulunamadý.";
                 return RedirectToAction("TablesData"); // Geri yönlendirme
             }
 
-            var oturumlar = _context.Oturumlar
-            .Where(o => o.SýnýfID == sýnýfID) // SýnýfID'ye göre oturumlarý filtrele
-             .ToList();
+            // Seçilen sýnýfýn derslerini alýyoruz
+            var dersler = _context.EklenenDersler
+                .Where(o => o.SýnýfID == sýnýfID)
+                .ToList();
 
-            // Sýnýfa ait oturumlarý filtrele
-           
-            var gunler = oturumlar.Select(o => o.Gun).Distinct().OrderBy(g => g).ToList();
-            var saatler = oturumlar
-     .Select(o => new SaatAraligi { BaslangicSaati = o.BaslangicSaati, BitisSaati = o.BitisSaati })
-     .Distinct()
-     .ToList();
+            // Sýnýfa ait oturumlarý filtreliyoruz
+            var gunler = dersler.Select(o => o.Gun).Distinct().OrderBy(g => g).ToList();
+            var saatler = dersler
+                .Select(o => new SaatAraligi { BaslangicSaati = o.BaslangicSaati, BitisSaati = o.BitisSaati })
+                .Distinct()
+                .ToList();
 
-            Console.WriteLine("Sýnýflar Sayýsý: " + sýnýflar.Count());
+            var bolumler = dersler.Select(d => d.BolumAdi).Distinct().OrderBy(b => b).ToList();
+
+            // Verileri ViewBag üzerinden gönderiyoruz
             ViewBag.Saatler = saatler;
-
-
-            ViewBag.SelectedClassName = selectedClass.SýnýfAd; // View'da kullanmak için
+            ViewBag.SelectedClassName = selectedClass.SýnýfAd; // Seçilen sýnýf adý
             ViewBag.Gunler = gunler;
-            ViewBag.Oturumlar = oturumlar;
-         
-            ViewBag.Sýnýflar = sýnýflar; // Sýnýflar
+            ViewBag.Oturumlar = dersler;
+            ViewBag.Bolumler = bolumler;
+            ViewBag.Sýnýflar = sýnýflar; // Admin ya da kullanýcýnýn fakültesine göre filtrelenmiþ sýnýflar
 
-            // Seçilen sýnýfý View'e gönder
+            // Sayfayý döndürüyoruz
             return View("tables-general");
 
 

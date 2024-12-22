@@ -17,10 +17,11 @@ namespace DersPrgProjesi.Controllers
         }
 
         // GET: Oturum Ekleme Formu
-        public IActionResult OturumEkle()
+        public IActionResult OturumEkle(string sınıfAdı)
         {
+            Console.WriteLine(sınıfAdı);
             var userType = HttpContext.Session.GetString("UserType");
-            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
+            //var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
 
             // Sınıfları filtrele
             List<Sınıf> sınıflar;
@@ -29,13 +30,17 @@ namespace DersPrgProjesi.Controllers
             {
                 // Admin tüm sınıfları görür
                 sınıflar = _context.Sınıflar.ToList();
+               
             }
             else if (userType == "Fakulte" || userType == "Bolum")
             {
                 // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
+                var fakulteId = HttpContext.Session.GetInt32("FakulteID");
                 sınıflar = _context.Sınıflar
-                    .Where(s => s.FakulteID == fakulteNo)
+                    .Where(s => s.FakulteID == fakulteId)
                     .ToList();
+
+                Console.WriteLine(sınıflar.Count());
             }
             else
             {
@@ -43,30 +48,47 @@ namespace DersPrgProjesi.Controllers
                 TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
             }
-
+          
             // Sınıfları View'e gönder
             return View("OturumEkle", sınıflar);
         }
 
         // POST: Oturum Ekleme
         [HttpPost]
-        public IActionResult OturumEkle(TimeSpan BaslangicSaati, TimeSpan BitisSaati, DayOfWeek Gun, string SınıfAd)
+        public IActionResult OturumEkle(TimeSpan BaslangicSaati, TimeSpan BitisSaati, DayOfWeek Gun, string sınıfAdı, string DersAdi, string BolumAdi)
         {
 
+            Console.WriteLine(sınıfAdı);
             var userType = HttpContext.Session.GetString("UserType");
-            var fakulteNo = HttpContext.Session.GetInt32("FakulteID");
+           
 
             List<Sınıf> sınıflar;
+
 
             if (userType == "Admin")
             {
                 sınıflar = _context.Sınıflar.ToList();
+                
             }
-            else if (userType == "Fakulte" || userType == "Bolum")
+            else if (userType == "Fakulte")
             {
+                var fakulteNo = HttpContext.Session.GetInt32("FakulteID");
                 sınıflar = _context.Sınıflar
                     .Where(s => s.FakulteID == fakulteNo)
                     .ToList();
+              
+            }
+            else if (userType == "Bolum")
+            {
+                // Bölüm sadece kendi fakültesine ait sınıfları görebilir
+                var bolumId = HttpContext.Session.GetInt32("BolumID");
+                var bolum = _context.Bolumler.FirstOrDefault(b => b.BolumID == bolumId);
+
+
+                    sınıflar = _context.Sınıflar
+                        .Where(s => s.FakulteID == bolum.FakulteID) // Bölümün fakülte ID'sine göre filtrele
+                        .ToList();
+                
             }
             else
             {
@@ -74,13 +96,14 @@ namespace DersPrgProjesi.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-        
+
+
 
             if (ModelState.IsValid)
             {
                 // Sınıf ID'yi bulmak için SınıfAd'ı kullan
                 var sınıfId = _context.Sınıflar
-                    .Where(s => s.SınıfAd == SınıfAd)
+                    .Where(s => s.SınıfAd == sınıfAdı)
                     .Select(s => s.SınıfID)
                     .FirstOrDefault();
 
@@ -91,24 +114,47 @@ namespace DersPrgProjesi.Controllers
                 }
 
                 // Yeni Oturum nesnesi oluştur
-                var yeniOturum = new Oturum
+                var yeniOturum = new EklenenDers
                 {
                     BaslangicSaati = BaslangicSaati,
                     BitisSaati = BitisSaati,
                     Gun = Gun,
-                    SınıfID = sınıfId
+                    SınıfID = sınıfId,
+                    DersAdi = DersAdi,
+                    BolumAdi = BolumAdi
                 };
 
                 // Veritabanına kaydet
-                _context.Oturumlar.Add(yeniOturum);
+                _context.EklenenDersler.Add(yeniOturum);
                 _context.SaveChanges();
 
                 // Başarıyla yönlendir
                 return RedirectToAction("Index", "Home");
             }
+            //if (!ModelState.IsValid)
+            //{
+            //    // Hataları al ve bir string değişkene ata
+            //    var errors = ModelState.Values
+            //        .SelectMany(v => v.Errors)
+            //        .Select(e => e.ErrorMessage + (e.Exception != null ? $" - {e.Exception.Message}" : ""))
+            //        .ToList();
+
+            //    // Hataları loglama veya ekrana yazdırma
+            //    foreach (var error in errors)
+            //    {
+            //        Console.WriteLine(error); // Bu satırı loglama mekanizmanıza uyarlayabilirsiniz.
+            //    }
+
+            //    // TempData ile hata mesajını kullanıcıya göstermek isterseniz
+            //    TempData["ErrorDetails"] = string.Join("; ", errors);
+
+            //    return View(sınıflar);
+            //}
 
             // Eğer ModelState hatalıysa aynı sayfaya dön
-            return View();
+            return View(sınıflar);
+
+
 
         }
 
