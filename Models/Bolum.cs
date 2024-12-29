@@ -13,9 +13,7 @@ namespace DersPrgProjesi.Models
         [Required]
         public string BolumSifre { get; set; }
         // Foreign key for Fakulte
-        public int? FakulteID { get; set; }  // Nullable, çünkü bazı durumlarda FakülteID olmayabilir
-
-        // Navigation property for Fakulte
+        public int? FakulteID { get; set; }  
         public virtual Fakulte Fakulte { get; set; }  // Fakülteyi referans alır
     }
 }

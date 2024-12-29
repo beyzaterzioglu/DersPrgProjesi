@@ -71,25 +71,34 @@ namespace DersPrgProjesi.Controllers
             var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
 
             // Sınıfları filtrele
-            List<Sınıf> sınıflar;
+           
+
+            var sınıflar = new List<Sınıf>();
 
             if (userType == "Admin")
             {
-                // Admin tüm sınıfları görür
+
                 sınıflar = _context.Sınıflar.ToList();
             }
-            else if (userType == "Fakulte" || userType == "Bolum")
+            else if (userType == "Fakulte")
             {
-                // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
+                var fakulteId = HttpContext.Session.GetInt32("FakulteID");
                 sınıflar = _context.Sınıflar
-                    .Where(s => s.FakulteID == fakulteNo)
+                    .Where(s => s.FakulteID == fakulteId) // FakülteID ile filtrele
                     .ToList();
             }
-            else
+            else if (userType == "Bolum")
             {
-                // Eğer kullanıcı tipi tanımlı değilse, hata mesajı ile geri döndür
-                TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
-                return RedirectToAction("Index", "Home");
+                // Bölüm sadece kendi fakültesine ait sınıfları görebilir
+                var bolumId = HttpContext.Session.GetInt32("BolumID");
+                var bolum = _context.Bolumler.FirstOrDefault(b => b.BolumID == bolumId);
+
+                if (bolum != null)
+                {
+                    sınıflar = _context.Sınıflar
+                        .Where(s => s.FakulteID == bolum.FakulteID) // Bölümün fakülte ID'sine göre filtrele
+                        .ToList();
+                }
             }
 
             // Sınıfları View'e gönder

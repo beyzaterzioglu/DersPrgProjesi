@@ -144,8 +144,26 @@
     <main id="main" class="main">
 
         <div class="pagetitle">
-            <h1>Anasayfa</h1>
-        </div><!-- End Page Title -->
+            <h3>Anasayfa</h3>
+        </div>
+        <div class="container mt-4">
+            <h1>Proje Hakkında Bilgi</h1>
+            <p>Bu sistem, üniversitelerdeki dinamik ders programı ihtiyaçlarını karşılamak için tasarlanmıştır. Kullanıcıların fakülte, admin ve bölüm bazında ders, sınıf ve kullanıcı yönetimi yapmasını sağlar.</p>
+
+            <h1>Kullanıcı Rolleri ve Yetkileri</h1>
+            <ul>
+                <li>
+                    <strong>Fakülte:</strong> Fakülteye bağlı bölümleri, dersleri ve sınıfları yönetebilir; genel ders programını düzenleyebilir.
+                </li>
+                <li>
+                    <strong>Admin:</strong> Tüm sistemin genel yönetimini sağlar; fakülte ve bölümleri ekleyip kaldırabilir; kullanıcı yönetimi yapabilir.
+                </li>
+                <li>
+                    <strong>Bölüm:</strong> Kendi bölümüne ait dersleri, sınıfları ve kullanıcıları yönetebilir; ders programını düzenleyebilir.
+                </li>
+            </ul>
+           
+        </div>
 
     </main><!-- End #main -->
     @if (TempData["ErrorMessage"] != null)

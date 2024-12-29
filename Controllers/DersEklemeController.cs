@@ -18,62 +18,72 @@ namespace DersPrgProjesi.Controllers
             _logger = logger;
         }
 
-        //public IActionResult DersEkleme()
-        //{
-        //    var userType = HttpContext.Session.GetString("UserType");
-        //    var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
-
-        //    // Sınıfları filtrele
-        //    List<Sınıf> sınıflar;
-
-        //    if (userType == "Admin")
-        //    {
-        //        // Admin tüm sınıfları görür
-        //        sınıflar = _context.Sınıflar.ToList();
-        //    }
-        //    else if (userType == "Fakulte" || userType == "Bolum")
-        //    {
-        //        // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
-        //        sınıflar = _context.Sınıflar
-        //            .Where(s => s.FakulteID == fakulteNo)
-        //            .ToList();
-        //    }
-        //    else
-        //    {
-        //        // Eğer kullanıcı tipi tanımlı değilse, hata mesajı ile geri döndür
-        //        TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
-        //        return RedirectToAction("Index", "Home");
-        //    }
-
-        //    // Sınıfları View'e gönder
-        //    return View("~/Views/Home/tables-general.cshtml", sınıflar);
-        //}
-
-        [HttpPost]
-        public IActionResult DersEkleme(string DersAdi, string BolumAd, DayOfWeek Gun, TimeSpan BaslangicSaati, TimeSpan BitisSaati, int SınıfID)
+        public IActionResult DersEkleme()
         {
-
             var userType = HttpContext.Session.GetString("UserType");
-            var fakulteNo = HttpContext.Session.GetInt32("FakulteID");
+            var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
 
+            // Sınıfları filtrele
             List<Sınıf> sınıflar;
 
             if (userType == "Admin")
             {
+                // Admin tüm sınıfları görür
                 sınıflar = _context.Sınıflar.ToList();
             }
             else if (userType == "Fakulte" || userType == "Bolum")
             {
+                // Fakülte ve Bölüm kullanıcıları sadece kendi fakültelerindeki sınıfları görür
                 sınıflar = _context.Sınıflar
                     .Where(s => s.FakulteID == fakulteNo)
                     .ToList();
             }
             else
             {
+                // Eğer kullanıcı tipi tanımlı değilse, hata mesajı ile geri döndür
                 TempData["ErrorMessage"] = "Bu sayfaya erişim yetkiniz yok.";
                 return RedirectToAction("Index", "Home");
             }
 
+            // Sınıfları View'e gönder
+            return View("~/Views/Home/tables-general.cshtml", sınıflar);
+        }
+
+        [HttpPost]
+        public IActionResult DersEkleme(string DersAdi, string BolumAd, DayOfWeek Gun, TimeSpan BaslangicSaati, TimeSpan BitisSaati, int SınıfID)
+        {
+
+            var userType = HttpContext.Session.GetString("UserType");
+            //var fakulteNo = HttpContext.Session.GetInt32("FakulteID"); // Fakülte numarası
+
+            //List<Sınıf> sınıflar;
+            var sınıflar = new List<Sınıf>();
+
+            if (userType == "Admin")
+            {
+
+                sınıflar = _context.Sınıflar.ToList();
+            }
+            else if (userType == "Fakulte")
+            {
+                var fakulteId = HttpContext.Session.GetInt32("FakulteID");
+                sınıflar = _context.Sınıflar
+                    .Where(s => s.FakulteID == fakulteId) // FakülteID ile filtrele
+                    .ToList();
+            }
+            else if (userType == "Bolum")
+            {
+                // Bölüm sadece kendi fakültesine ait sınıfları görebilir
+                var bolumId = HttpContext.Session.GetInt32("BolumID");
+                var bolum = _context.Bolumler.FirstOrDefault(b => b.BolumID == bolumId);
+
+                if (bolum != null)
+                {
+                    sınıflar = _context.Sınıflar
+                        .Where(s => s.FakulteID == bolum.FakulteID) // Bölümün fakülte ID'sine göre filtrele
+                        .ToList();
+                }
+            }
 
 
             if (ModelState.IsValid)
